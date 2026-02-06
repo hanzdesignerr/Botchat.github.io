@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SMK Pertiwi Kuningan</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        background: #0e1621;
+        display: flex;
+        justify-content: center;
+      }
+
+      /* Container utama */
+      .chat-container {
+        width: 100%;
+        max-width: 420px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: url("background.jpg") no-repeat center center / cover;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Background doodle ala Telegram */
+      .chat-container::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(
+          rgba(255, 255, 255, 0.04) 1px,
+          transparent 1px
+        );
+        background-size: 22px 22px;
+        opacity: 0.4;
+        pointer-events: none;
+      }
+
+      /* Header */
+      .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        background: #17212b;
+        color: #fff;
+        z-index: 2;
+      }
+
+      .chat-header img {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+      }
+
+      .chat-header strong {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      /* Area chat */
+      .chat-box {
+        flex: 1;
+        padding: 14px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 2;
+      }
+
+      /* Bubble umum */
+      .bubble {
+        max-width: 75%;
+        padding: 10px 12px 18px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.4;
+        position: relative;
+        animation: fadeUp 0.25s ease;
+      }
+
+      /* Bubble user (kanan) */
+      .user {
+        align-self: flex-end;
+        background: #2b5278;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+
+      /* Bubble bot (kiri) */
+      .bot {
+        align-self: flex-start;
+        background: #182533;
+        color: #eaeaea;
+        border-bottom-left-radius: 4px;
+      }
+
+      /* Jam */
+      .time-user,
+      .time-bot {
+        font-size: 10px;
+        position: absolute;
+        bottom: 4px;
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .time-user {
+        right: 8px;
+      }
+
+      .time-bot {
+        left: 8px;
+      }
+
+      /* Input bawah */
+      .chat-input {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        background: #17212b;
+        z-index: 2;
+      }
+
+      .chat-input input {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: 22px;
+        border: none;
+        outline: none;
+        font-size: 14px;
+        background: #242f3d;
+        color: #fff;
+      }
+
+      .chat-input input::placeholder {
+        color: #9aa4af;
+      }
+
+      .chat-input button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        background: #2b5278;
+        color: #fff;
+        font-size: 16px;
+        transition: 0.2s;
+      }
+
+      .chat-input button:hover {
+        background: #3a6ea5;
+      }
+
+      .clear-btn {
+        background: #b43c3c;
+      }
+
+      .clear-btn:hover {
+        background: #d44;
+      }
+
+      /* Animasi */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <img src="logo.jpg" />
+        <strong>Casper Chat</strong>
+      </div>
+
+      <div class="chat-box" id="chatBox"></div>
+
+      <div class="chat-input">
+        <input id="input" type="text" placeholder="Ketik pertanyaan..." />
+        <button onclick="send()">➤</button>
+        <button class="clear-btn" onclick="clearChat()">🗑️</button>
+      </div>
+    </div>
+
+    <script>
+      function timeNow() {
+        return new Date().toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function addChat(text, type) {
+        const chatBox = document.getElementById("chatBox");
+        const bubble = document.createElement("div");
+        bubble.className = "bubble " + type;
+        bubble.innerHTML =
+          text +
+          `<div class="${type === "user" ? "time-user" : "time-bot"}">${timeNow()}</div>`;
+        chatBox.appendChild(bubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function send() {
+        const input = document.getElementById("input");
+        const text = input.value.trim();
+        if (!text) return;
+
+        addChat(text, "user");
+        input.value = "";
+
+        setTimeout(() => {
+          addChat(getAnswer(text.toLowerCase()), "bot");
+        }, 600);
+      }
+
+      function clearChat() {
+        document.getElementById("chatBox").innerHTML = "";
+      }
+
+      function getAnswer(q) {
+        if (q.includes("jurusan")) {
+          return `
+<b>Inilah Jurusan di SMK Pertiwi Kuningan:</b><br><br>
+<b>RPL</b> – Pemrograman, website, aplikasi, database, dan software industri.<br><br>
+<b>TKJ</b> – Jaringan komputer, server, internet, dan perakitan PC.<br><br>
+<b>LP</b> – Layanan perbankan dan administrasi keuangan.<br><br>
+<b>TSM</b> – Servis dan perawatan sepeda motor.<br><br>
+<b>TKR</b> – Teknik kendaraan ringan (mobil).<br><br>
+<b>TO</b> – Elektronika dan sistem otomotif modern.<br><br>
+<b>BDP</b> – Bisnis daring dan pemasaran digital.
+`;
+        }
+        if (q.includes("halo")) {
+          return `
+<b>Hallo jugaa!! selamat datang 
+di chatbot casper79 ada yang mau di tanyakan?</b><br>
+
+`;
+        }
+
+        if (q.includes("fasilitas")) {
+          return `
+<b>Fasilitas SMK Pertiwi Kuningan:</b><br>
+- Kolam Renang<br>
+- Gedung RPL<br>
+- Gedung TSM<br>
+- Bengkel TKR<br>
+- GOR<br>
+- Virtual Lab (V-Lab)<br>
+- Ruang Praktik Lengkap
+`;
+        }
+
+        if (q.includes("alamat")) {
+          return `
+<b>Alamat SMK Pertiwi Kuningan:</b><br>
+Jl. siliwangi No. 26A,kasturi, Kabupaten Kuningan, Jawa Barat
+`;
+        }
+        if (q.includes("logo")) {
+          return `
+<b><img src="logo.jpg" alt="" /></b><br>
+`;
+        }
+        if (q.includes("spw")) {
+          return `
+<b>Ya, SMK Pertiwi Kuningan memiliki program SPW (Sekolah Pencetak Wirausaha) yang bertujuan untuk membekali siswa dengan keterampilan berwirausaha, kreativitas, dan jiwa mandiri agar siap membuka usaha sendiri setelah lulus.</b><br>
+`;
+        }
+        if (q.includes("kabid teknologi")) {
+          return `
+<b>Nurhidayat, S.Kom – Kabid Teknologi Informasi (mis. jurusan RPL & Jaringan Komputer)</b><br>
+`;
+        }
+        if (q.includes("kabid otomotif")) {
+          return `
+<b>Agus Gumelar – Kabid Teknologi Manufaktur dan Rekayasa (mis. jurusan otomotif</b><br>
+`;
+        }
+        if (q.includes("kabid akuntansi")) {
+          return `
+<b>Arie Rinaldi, S.Pd – Kabid Bisnis dan Manajemen (mis. jurusan Akuntansi & Pemasaran)</b><br>
+`;
+        }
+        if (q.includes("pembuat")) {
+          return `
+<b>“Website ini dibuat dan dikembangkan oleh siswa kelas XI RPL 1 sebagai bagian dari pembelajaran dan pengembangan keterampilan di bidang Rekayasa Perangkat Lunak. Pembuatan website ini bertujuan untuk melatih kreativitas, kemampuan teknis, serta penerapan ilmu yang telah dipelajari di sekolah.”</b><br>
+`;
+        }
+        
+        if (q.includes("pondok pesantren")) {
+          return `
+<b>Ya! Di SMK Pertiwi Kuningan memang ada pondok pesantren (Ponpes Modern Al-Majid) yang terintegrasi dengan sekolah tersebut — artinya siswa bisa belajar selain pelajaran sekolah biasa, juga mendapatkan pembinaan agama di lingkungan pesantren selama mereka bersekolah di situ.</b><br>
+`;
+        }
+        if (q.includes("seru")) {
+          return `
+<b>Iya! Sekolah di SMK Pertiwi Kuningan seru, karena selain belajar teori di kelas, kamu juga banyak ikut praktik, kegiatan ekstrakurikuler, kerja kelompok, serta kegiatan sosial di sekolah. Suasana belajar jadi nggak monoton, teman-temannya juga bisa seru dan supportif buat bantu kamu berkembang. 🎒😊</b><br>
+`;
+        }
+        if (q.includes("ekstrakulikuler")) {
+          return `
+<b>Ekstrakurikuler yang ada di SMK Pertiwi Kuningan meliputi kegiatan Pramuka, Paskibra, olahraga, seni, OSIS, balap motor, e-esport serta kegiatan keagamaan (Rohis) yang bertujuan untuk mengembangkan minat, bakat, kedisiplinan, dan keterampilan sosial siswa di luar kegiatan belajar di kelas.</b><br>
+`;
+        }
+        if (q.includes("keunggulan")) {
+          return `
+<b>Keunggulan SMK Pertiwi Kuningan dibandingkan sekolah lain adalah pembelajaran yang menekankan praktik, dukungan guru yang profesional, fasilitas yang memadai, serta pembinaan karakter dan keterampilan siswa agar siap kerja maupun melanjutkan pendidikan.</b><br>
+
+`;
+        }
+
+        if (q.includes("jam masuk") || q.includes("masuk jam berapa")) {
+          return `
+<b>Jam Masuk SMK Pertiwi Kuningan:</b><br>
+Kegiatan belajar dimulai pukul <b>07.00 WIB</b>
+`;
+        }
+        if (q.includes("jam pulang") || q.includes("pulang jam berapa")) {
+          return `
+<b>Jam pulang SMK Pertiwi Kuningan:</b><br>
+ selesai Kegiatan belajar pada pukul <b>15.00 WIB</b>
+`;
+        }
+        if (q.includes("rpl") || q.includes("pembelajaran rpl")) {
+          return `
+<b>Yang diajarkan di RPL yaitu:</b><br>
+ Memfokuskan pada software seperti pembuatan website dan game<b></b>
+`;
+        }
+        if (q.includes("tkj") || q.includes("pembelajaran tkj")) {
+          return `
+<b>Yang diajarkan di TKJ yaitu:</b><br>
+ Mempelajari komponen komputer seperti CPU, RAM, HARDDISK, motherboad<b></b>
+`;
+        }
+        if (q.includes("tsm") || q.includes("pembelajaran tsm")) {
+          return `
+<b>Yang diajarkan di TSM yaitu:</b><br>
+ Mempelajari perawatan, perbaikan, dan sistem kerja motor juga tentang mesin motor<b></b>
+`;
+        }
+        if (q.includes("tkr") || q.includes("pembelajaran tkr")) {
+          return `
+<b>Yang diajarkan di TKR yaitu:</b><br>
+ Mempelajari perawatan, perbaikan, dan sistem kerja kendaraan roda 4 seperti mobil<b></b>
+`;
+        }
+        if (q.includes("to") || q.includes("pembelajaran to")) {
+          return `
+<b>Yang diajarkan di TO yaitu:</b><br>
+ Mempelajari teknologi elektronik pada kendaraan modern, sistem kelistrikan, dan elektronika mobil<b></b>
+`;
+        }
+        if (q.includes("lp") || q.includes("pembelajaran lp")) {
+          return `
+<b>Yang diajarkan di lp yaitu:</b><br>
+ Mempelajari sistem kerja di dunian perbankkan tentang produk bank, administrasi keuangan, teller dan customer<b></b>
+`;
+        }
+        if (q.includes("bdp") || q.includes("pembelajaran bdp")) {
+          return `
+<b>Yang diajarkan di BDP yaitu:</b><br>
+ Mempelajari cara menjalankan bisnis dan pemasaran secara online maupun offline seperti strategi pemasaran<b></b>
+`;
+        }
+        if (q.includes("sejarah") || q.includes("sejarah smk pertiwi")) {
+          return `
+<b>Sejarah singkat SMK Pertiwi Kuningan:</b><br>
+ SMK Pertiwi Kuningan merupakan salah satu sekolah menengah kejuruan swasta di Kabupaten Kuningan, Jawa Barat. Sekolah ini didirikan dengan tujuan untuk mencetak lulusan yang terampil, berkarakter, dan siap kerja sesuai dengan kebutuhan dunia usaha dan dunia industri.
+Seiring perkembangannya, SMK Pertiwi Kuningan terus meningkatkan kualitas pendidikan dengan membuka berbagai program keahlian, melengkapi fasilitas praktik, serta menjalin kerja sama dengan dunia industri. Hal tersebut dilakukan agar peserta didik memiliki kompetensi yang relevan dan mampu bersaing di era modern.
+Hingga saat ini, SMK Pertiwi Kuningan dikenal sebagai sekolah yang berkomitmen pada pendidikan vokasi, pembentukan karakter, serta pengembangan keterampilan siswa agar siap melanjutkan ke dunia kerja maupun pendidikan yang lebih tinggi.<b></b>
+`;
+        }
+
+        if (q.includes("kepala sekolah")) {
+          return `
+Kepala Sekolah SMK Pertiwi Kuningan adalah<br>
+<b>Dea Ariana Vamitrianto, SE., M.Si.</b>
+`;
+        }
+
+        return "Silakan tanyakan tentang jurusan, fasilitas, alamat, jam masuk, atau profil SMK Pertiwi Kuningan 😊";
+      }
+    </script>
+  </body>
+</html>
